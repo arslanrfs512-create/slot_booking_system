@@ -2,9 +2,6 @@
 // admin/index.php
 require_once __DIR__.'/../config.php';
 
-// load products and staff
-$products = $pdo->query("SELECT id,name FROM products ORDER BY id")->fetchAll();
-$staff = $pdo->query("SELECT id,name FROM staff ORDER BY id")->fetchAll();
 ?>
 <!doctype html>
 <html lang="en">
@@ -29,56 +26,60 @@ $staff = $pdo->query("SELECT id,name FROM staff ORDER BY id")->fetchAll();
             </div>
         </div>
 
-        <form id="templateForm" class="card p-3">
-            <div class="mb-3 row">
-                <label class="col-sm-2 col-form-label">Product</label>
-                <div class="col-sm-4">
-                    <select name="product_id" id="product_id" class="form-select" required>
-                        <option value="">Select product</option>
-                        <?php foreach($products as $p): ?>
-                        <option value="<?=htmlspecialchars($p['id'])?>"><?=htmlspecialchars($p['name'])?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+        <form id="templateForm" class="card shadow p-4 border-0 rounded-3">
+            <h4 class="mb-4">Template & Slots Setup</h4>
 
-                <label class="col-sm-2 col-form-label">Date range</label>
-                <div class="col-sm-4 d-flex gap-2">
+            <!-- Date Range -->
+            <div class="row mb-4 align-items-center">
+                <label class="col-sm-2 col-form-label fw-semibold">Date Range</label>
+                <div class="col-sm-10 d-flex gap-3">
                     <input type="date" class="form-control" name="start_date" id="start_date" required>
                     <input type="date" class="form-control" name="end_date" id="end_date" required>
                 </div>
             </div>
 
-            <div class="mb-3 row">
-                <label class="col-sm-2 col-form-label">Min players</label>
-                <div class="col-sm-2"><input type="number" min="1" value="1" name="min_players" id="min_players"
-                        class="form-control" required></div>
-                <label class="col-sm-2 col-form-label">Max players</label>
-                <div class="col-sm-2"><input type="number" min="1" value="4" name="max_players" id="max_players"
-                        class="form-control" required></div>
-                <div class="col-sm-4">
-                    <button type="button" id="generatePlayers" class="btn btn-info">Generate Players Pricing</button>
+            <!-- Min / Max Players -->
+            <div class="row mb-4 align-items-center">
+                <label class="col-sm-2 col-form-label fw-semibold">Players</label>
+                <div class="col-sm-2">
+                    <input type="number" min="1" value="1" name="min_players" id="min_players"
+                        class="form-control text-center" required>
+                    <small class="text-muted">Min</small>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" min="1" value="4" name="max_players" id="max_players"
+                        class="form-control text-center" required>
+                    <small class="text-muted">Max</small>
+                </div>
+                <div class="col-sm-6 text-end">
+                    <button type="button" id="generatePlayers" class="btn btn-outline-info">
+                        Generate Pricing
+                    </button>
                 </div>
             </div>
 
-            <div id="playersPricingWrap" class="mb-3"></div>
+            <!-- Players Pricing -->
+            <div id="playersPricingWrap" class="mb-4"></div>
 
             <hr>
-            <div class="mb-3">
-                <h5>Dates & Time Slots</h5>
-                <div class="mb-2 text-muted">After selecting a date range click "Generate Dates" then add time slots per
-                    date.</div>
-                <div class="d-flex gap-2 mb-2">
+
+            <!-- Dates & Time Slots -->
+            <div class="mb-4">
+                <h5 class="fw-semibold mb-2">Dates & Time Slots</h5>
+                <p class="text-muted small">Select a date range, generate dates, then add time slots per date.</p>
+                <div class="d-flex gap-2 mb-3">
                     <button type="button" id="generateDates" class="btn btn-primary">Generate Dates</button>
                     <button type="button" id="clearDates" class="btn btn-outline-secondary">Clear Dates</button>
                 </div>
                 <div id="datesContainer"></div>
             </div>
 
-            <!-- Hidden until slots are generated -->
+            <!-- Save Button -->
             <div class="d-flex justify-content-end" id="saveBtnWrap" style="display:none;">
-                <button type="submit" class="btn btn-success">Save Template & Slots</button>
+                <button type="submit" class="btn btn-success px-4">💾 Save Template & Slots</button>
             </div>
         </form>
+
     </div>
     <?php
     // Fetch default time slots from DB
@@ -146,33 +147,16 @@ $staff = $pdo->query("SELECT id,name FROM staff ORDER BY id")->fetchAll();
 
                 // auto insert default slots
                 let container = block.find('.time-slots-list');
-                //     defaultSlots.forEach(function(slot) {
-                //         const row = $(`
-                //   <div class="row align-items-center mb-2 slot-row">
-                //     <input type="hidden" name="dates[${slotIndex}][date]" value="${dateStr}">
-                //     <div class="col-auto"><input type="time" name="dates[${slotIndex}][start_time]" value="${slot.start_time}" class="form-control form-control-sm" required></div>
-                //     <div class="col-auto"><input type="time" name="dates[${slotIndex}][end_time]" value="${slot.end_time}" class="form-control form-control-sm" required></div>
-                //     <div class="col-auto">
-                //       <select name="dates[${slotIndex}][status]" class="form-select form-select-sm" required>
-                //         <option value="available">Available</option>
-                //         <option value="unavailable">Unavailable</option>
-                //         <option value="booked">Booked</option>
-                //       </select>
-                //     </div>
-                //     <div class="col-auto"><button type="button" class="btn btn-sm btn-danger remove-slot">×</button></div>
-                //   </div>
-                // `);
-                //         container.append(row);
-                //         slotIndex++;
-                //     });
 
                 defaultSlots.forEach(function(slot) {
                     // Check if this date is Tuesday (0=Sunday, 1=Monday, 2=Tuesday...)
-                    const isTuesday = (new Date(dateStr).getDay() === 2);
+                    const isTuesday = (new Date(dateStr).getDay() === 1);
 
                     const row = $(`
       <div class="row align-items-center mb-2 slot-row">
         <input type="hidden" name="dates[${slotIndex}][date]" value="${dateStr}">
+          <input type="hidden" name="dates[${slotIndex}][number_of_staff]" 
+           value="${block.find('input[name$="[number_of_staff]"]').val() || 1}">
         <div class="col-auto">
           <input type="time" name="dates[${slotIndex}][start_time]" value="${slot.start_time}" class="form-control form-control-sm" required>
         </div>
@@ -210,10 +194,12 @@ $staff = $pdo->query("SELECT id,name FROM staff ORDER BY id")->fetchAll();
         $(document).on('click', '.addSlotBtn', function() {
             const parent = $(this).closest('.card');
             const date = parent.data('date');
+            const staffVal = parent.find('input[name$="[number_of_staff]"]').val() || 1;
 
             const row = $(`
       <div class="row align-items-center mb-2 slot-row">
         <input type="hidden" name="dates[${slotIndex}][date]" value="${date}">
+        <input type="hidden" name="dates[${slotIndex}][number_of_staff]" value="${staffVal}">
         <div class="col-auto"><input type="time" name="dates[${slotIndex}][start_time]" class="form-control form-control-sm" required></div>
         <div class="col-auto"><input type="time" name="dates[${slotIndex}][end_time]" class="form-control form-control-sm" required></div>
         <div class="col-auto">
@@ -290,6 +276,13 @@ $staff = $pdo->query("SELECT id,name FROM staff ORDER BY id")->fetchAll();
                     console.error(xhr.responseText);
                 }
             });
+        });
+        // staff change -> update all slot hidden inputs in that block
+        $(document).on('input', '.date-block input[name$="[number_of_staff]"]', function() {
+            const parent = $(this).closest('.date-block');
+            const staffVal = $(this).val() || 1;
+
+            parent.find('input[name$="[number_of_staff]"][type=hidden]').val(staffVal);
         });
 
     });

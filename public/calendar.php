@@ -26,10 +26,8 @@ $refreshInterval = $settings->fetchColumn() ?: 15;
     #calendar { max-width: 1100px; margin: 20px auto; }
     .slot-pill { display:inline-block; padding:6px 10px; border-radius:6px; margin:4px; color:#fff; cursor:pointer; }
     .s-available { background:#28a745; }
-    .s-reserved  { background:#ffc107; color:#000; }
-    .s-booked    { background:#6c757d; }
-    .s-blocked   { background:#343a40; }
-    .s-cancelled { background:#dc3545; }
+    .s-booked    { background:#dc3545; }
+    .s-unavailable { background:#6c757d; }
   </style>
 </head>
 <body class="bg-light">
