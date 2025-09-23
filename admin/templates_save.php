@@ -44,7 +44,7 @@ try {
         $start = sanitize_time($d['start_time'] ?? null);
         $end = sanitize_time($d['end_time'] ?? null);
         $number_of_staff = $d['number_of_staff'] ?? null;
-        $status = in_array($d['status'] ?? 'available', ['available','reserved','booked','blocked','cancelled']) ? $d['status'] : 'available';
+        $status = in_array($d['status'] ?? 'available', ['available','unavailable','booked']) ? $d['status'] : 'available';
         if(!$slot_date || !$start || !$end) continue;
         $tstmt->execute([$template_id, $product_id, $slot_date, $start, $end, $number_of_staff, $status]);
     }

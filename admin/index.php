@@ -23,7 +23,10 @@ $staff = $pdo->query("SELECT id,name FROM staff ORDER BY id")->fetchAll();
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Admin — Create Slot Template</h2>
-            <a class="btn btn-outline-secondary" href="slots_list.php">Manage Slots / Templates</a>
+            <div class="d-flex justify-content-between align-items-center mb-3 gap-3">
+                <a class="btn btn-outline-secondary" href="default_time_slots">Default time slots</a>
+                <a class="btn btn-outline-secondary" href="slots_list.php">Manage Slots / Templates</a>
+            </div>
         </div>
 
         <form id="templateForm" class="card p-3">
@@ -77,10 +80,15 @@ $staff = $pdo->query("SELECT id,name FROM staff ORDER BY id")->fetchAll();
             </div>
         </form>
     </div>
+    <?php
+    // Fetch default time slots from DB
+    $defaultSlots = $pdo->query("SELECT start_time, end_time FROM default_time_slots ORDER BY start_time")->fetchAll();
+    ?>
+
 
     <script>
     $(function() {
-
+        const defaultSlots = <?= json_encode($defaultSlots) ?>;
 
         function formatDate(d) {
             return d.toISOString().slice(0, 10);
@@ -126,9 +134,7 @@ $staff = $pdo->query("SELECT id,name FROM staff ORDER BY id")->fetchAll();
                         placeholder="e.g. 4" value="4" min="1" required>
                 </div>
                 <div class="col-sm-4 text-end">
-                  <button type="button" class="btn btn-sm btn-outline-primary addSlotBtn">
-                    Add Time Slot
-                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-primary addSlotBtn">Add Time Slot</button>
                 </div>
               </div>
               <div class="time-slots-list"></div>
@@ -136,42 +142,62 @@ $staff = $pdo->query("SELECT id,name FROM staff ORDER BY id")->fetchAll();
           </div>
         `);
 
-                // Auto-generate 4 slots (09:00 - 13:00)
-                const times = [
-                    ["09:00", "10:00"],
-                    ["10:00", "11:00"],
-                    ["11:00", "12:00"],
-                    ["12:00", "13:00"]
-                ];
-                times.forEach(t => {
+                $('#datesContainer').append(block);
+
+                // auto insert default slots
+                let container = block.find('.time-slots-list');
+                //     defaultSlots.forEach(function(slot) {
+                //         const row = $(`
+                //   <div class="row align-items-center mb-2 slot-row">
+                //     <input type="hidden" name="dates[${slotIndex}][date]" value="${dateStr}">
+                //     <div class="col-auto"><input type="time" name="dates[${slotIndex}][start_time]" value="${slot.start_time}" class="form-control form-control-sm" required></div>
+                //     <div class="col-auto"><input type="time" name="dates[${slotIndex}][end_time]" value="${slot.end_time}" class="form-control form-control-sm" required></div>
+                //     <div class="col-auto">
+                //       <select name="dates[${slotIndex}][status]" class="form-select form-select-sm" required>
+                //         <option value="available">Available</option>
+                //         <option value="unavailable">Unavailable</option>
+                //         <option value="booked">Booked</option>
+                //       </select>
+                //     </div>
+                //     <div class="col-auto"><button type="button" class="btn btn-sm btn-danger remove-slot">×</button></div>
+                //   </div>
+                // `);
+                //         container.append(row);
+                //         slotIndex++;
+                //     });
+
+                defaultSlots.forEach(function(slot) {
+                    // Check if this date is Tuesday (0=Sunday, 1=Monday, 2=Tuesday...)
+                    const isTuesday = (new Date(dateStr).getDay() === 2);
+
                     const row = $(`
-              <div class="row align-items-center mb-2 slot-row">
-                <input type="hidden" name="dates[${slotIndex}][date]" value="${dateStr}">
-                <div class="col-auto"><input type="time" name="dates[${slotIndex}][start_time]" value="${t[0]}" class="form-control form-control-sm" required></div>
-                <div class="col-auto"><input type="time" name="dates[${slotIndex}][end_time]" value="${t[1]}" class="form-control form-control-sm" required></div>
-                <div class="col-auto">
-                  <select name="dates[${slotIndex}][status]" class="form-select form-select-sm" required>
-                    <option value="available">Available</option>
-                    <option value="reserved">Reserved</option>
-                    <option value="booked">Booked</option>
-                    <option value="blocked">Blocked</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
-                <div class="col-auto">
-                  <button type="button" class="btn btn-sm btn-danger remove-slot">×</button>
-                </div>
-              </div>
-            `);
-                    block.find('.time-slots-list').append(row);
+      <div class="row align-items-center mb-2 slot-row">
+        <input type="hidden" name="dates[${slotIndex}][date]" value="${dateStr}">
+        <div class="col-auto">
+          <input type="time" name="dates[${slotIndex}][start_time]" value="${slot.start_time}" class="form-control form-control-sm" required>
+        </div>
+        <div class="col-auto">
+          <input type="time" name="dates[${slotIndex}][end_time]" value="${slot.end_time}" class="form-control form-control-sm" required>
+        </div>
+        <div class="col-auto">
+          <select name="dates[${slotIndex}][status]" class="form-select form-select-sm" required>
+            <option value="available" ${!isTuesday ? 'selected' : ''}>Available</option>
+            <option value="unavailable" ${isTuesday ? 'selected' : ''}>Unavailable</option>
+            <option value="booked">Booked</option>
+          </select>
+        </div>
+        <div class="col-auto"><button type="button" class="btn btn-sm btn-danger remove-slot">×</button></div>
+      </div>
+    `);
+
+                    container.append(row);
                     slotIndex++;
                 });
 
-                $('#datesContainer').append(block);
             }
-
             toggleSaveButton();
         });
+
 
 
         $('#clearDates').on('click', function() {

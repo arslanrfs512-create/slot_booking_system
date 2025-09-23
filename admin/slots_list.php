@@ -70,7 +70,7 @@ function loadSlots(){
     if(!res.success){ $('#tableWrap').html('<div class="text-danger">Error</div>'); return; }
     const rows = res.data;
     let html = `<table class="table table-sm"><thead><tr>
-      <th>ID</th><th>Product</th><th>Date</th><th>Time</th><th>Staff</th><th>Status</th><th>Actions</th>
+      <th>ID</th><th>Product</th><th>Date</th><th>Time</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody>`;
     rows.forEach(r=>{
       html += `<tr>
@@ -78,14 +78,11 @@ function loadSlots(){
         <td>${r.product_name}</td>
         <td>${r.slot_date}</td>
         <td>${r.start_time} - ${r.end_time}</td>
-        <td>${renderStaffSelect(r.id, r.staff_id)}</td>
         <td>
           <select class="form-select form-select-sm change-status" data-id="${r.id}">
             <option ${r.status=='available'?'selected':''} value="available">Available</option>
-            <option ${r.status=='reserved'?'selected':''} value="reserved">Reserved</option>
             <option ${r.status=='booked'?'selected':''} value="booked">Booked</option>
-            <option ${r.status=='blocked'?'selected':''} value="blocked">Blocked</option>
-            <option ${r.status=='cancelled'?'selected':''} value="cancelled">Cancelled</option>
+            <option ${r.status=='unavailable'?'selected':''} value="unavailable">Unavailable</option>
           </select>
         </td>
         <td>

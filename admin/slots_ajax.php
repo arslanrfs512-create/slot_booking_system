@@ -36,7 +36,7 @@ if($action === 'list') {
 if($action === 'change_status' && $_SERVER['REQUEST_METHOD']==='POST') {
     $id = (int)($_POST['id'] ?? 0);
     $status = $_POST['status'] ?? '';
-    if(!$id || !in_array($status, ['available','reserved','booked','blocked','cancelled'])) json_res(['success'=>false,'message'=>'Invalid']);
+    if(!$id || !in_array($status, ['available','unavailable','booked'])) json_res(['success'=>false,'message'=>'Invalid']);
     $old = $pdo->prepare("SELECT status FROM time_slots WHERE id=?");
     $old->execute([$id]); $oldRow = $old->fetch();
     $stmt = $pdo->prepare("UPDATE time_slots SET status=? WHERE id=?");
