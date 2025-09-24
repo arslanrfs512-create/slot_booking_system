@@ -1,6 +1,7 @@
 <?php
 // admin/index.php
 require_once __DIR__.'/../config.php';
+$staffs = $pdo->query("SELECT id, name FROM staff ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!doctype html>
@@ -91,6 +92,12 @@ require_once __DIR__.'/../config.php';
     $(function() {
         const defaultSlots = <?= json_encode($defaultSlots) ?>;
 
+        const staffs = <?= json_encode($staffs) ?>;
+        let staffOptions = "";
+        staffs.forEach(st => {
+            staffOptions += `<option value="${st.id}">${st.name}</option>`;
+        });
+
         function formatDate(d) {
             return d.toISOString().slice(0, 10);
         }
@@ -163,12 +170,19 @@ require_once __DIR__.'/../config.php';
         <div class="col-auto">
           <input type="time" name="dates[${slotIndex}][end_time]" value="${slot.end_time}" class="form-control form-control-sm" required>
         </div>
-        <div class="col-auto">
-          <select name="dates[${slotIndex}][status]" class="form-select form-select-sm" required>
-            <option value="available" ${!isTuesday ? 'selected' : ''}>Available</option>
-            <option value="unavailable" ${isTuesday ? 'selected' : ''}>Unavailable</option>
-            <option value="booked">Booked</option>
-          </select>
+        <div class="col-auto d-flex gap-3">
+            <label class="text-nowrap">Choose Staff</label>
+            <select name="dates[${slotIndex}][staff_id]" class="form-select form-select-sm" required>
+                    ${staffOptions}
+            </select>
+        </div>
+        <div class="col-auto d-flex gap-3">
+            <label class="text-nowrap">Choose Status</label>
+            <select name="dates[${slotIndex}][status]" class="form-select form-select-sm" required>
+                <option value="available" ${!isTuesday ? 'selected' : ''}>Available</option>
+                <option value="unavailable" ${isTuesday ? 'selected' : ''}>Unavailable</option>
+                <option value="booked">Booked</option>
+            </select>
         </div>
         <div class="col-auto"><button type="button" class="btn btn-sm btn-danger remove-slot">×</button></div>
       </div>
@@ -266,7 +280,7 @@ require_once __DIR__.'/../config.php';
                 success: function(resp) {
                     if (resp.success) {
                         alert('Template and slots saved successfully!');
-                        window.location.href = "/admin/slots_list.php"
+                        window.location.href = "./slots_list.php"
                     } else {
                         alert('Error: ' + (resp.message || 'Unknown'));
                     }
